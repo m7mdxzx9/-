@@ -212,7 +212,8 @@ h1 {
 .tracks-grid,
 .project-grid,
 .resources-grid,
-.lab-grid {
+.lab-grid,
+.timeline-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
@@ -222,7 +223,9 @@ h1 {
 .track-card,
 .project-card,
 .resource-card,
-.lab-card {
+.lab-card,
+.timeline-card,
+.assistant-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -236,7 +239,9 @@ h1 {
 .track-card:hover,
 .project-card:hover,
 .resource-card:hover,
-.lab-card:hover {
+.lab-card:hover,
+.timeline-card:hover,
+.assistant-card:hover {
   transform: translateY(-2px);
   border-color: rgba(84, 214, 187, 0.5);
   background: linear-gradient(180deg, rgba(84, 214, 187, 0.03), rgba(12, 16, 23, 0.8));
@@ -246,7 +251,9 @@ h1 {
 .track-card h3,
 .project-card h3,
 .resource-card h3,
-.lab-card h3 {
+.lab-card h3,
+.timeline-card h3,
+.assistant-card h3 {
   margin-bottom: 10px;
   font-size: 18px;
 }
@@ -254,7 +261,8 @@ h1 {
 .plan-card ul,
 .track-card ul,
 .project-card ul,
-.resource-card ul {
+.resource-card ul,
+.timeline-card ul {
   list-style: none;
   color: var(--text-soft);
 }
@@ -262,7 +270,8 @@ h1 {
 .plan-card li,
 .track-card li,
 .project-card li,
-.resource-card li {
+.resource-card li,
+.timeline-card li {
   margin-bottom: 6px;
 }
 
@@ -275,6 +284,40 @@ h1 {
   content: "•";
   color: var(--accent);
   margin-left: 6px;
+}
+
+.timeline-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.timeline-card h3 {
+  color: var(--accent);
+}
+
+.assistant-card {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.assistant-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.assistant-actions .mini-note {
+  margin: 0;
+}
+
+.resource-card a {
+  color: var(--accent-2);
+  text-decoration: underline;
+}
+
+.resource-card a:hover {
+  color: var(--accent);
 }
 
 .project-card .tag {
@@ -323,6 +366,10 @@ code {
   .nav-links {
     flex-wrap: wrap;
     justify-content: flex-end;
+  }
+
+  .assistant-card {
+    grid-template-columns: 1fr;
   }
 }
 

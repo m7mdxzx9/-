@@ -16,3 +16,13 @@ window.addEventListener("scroll", () => {
   navbar.style.opacity = current > lastScroll ? "0.92" : "1";
   lastScroll = current;
 });
+
+const assistantButton = document.getElementById("ask-assistant");
+if (assistantButton) {
+  assistantButton.addEventListener("click", () => {
+    const prompt = encodeURIComponent(
+      "السلام عليكم، أريد شرحاً لمواد خطة الذكاء الاصطناعي في جامعة أم القرى مع أمثلة عملية."
+    );
+    window.open(`https://chatgpt.com/?q=${prompt}`, "_blank", "noopener");
+  });
+}

@@ -22,3 +22,4 @@ npm run build
 - `src/`: ملفات الواجهة (HTML/CSS/JS).
 - `scripts/dev-server.js`: خادم تطوير بسيط بالاعتماد على Node.js.
 - `scripts/build.js`: نسخ الملفات إلى مجلد `dist/`.
+- قسم المساعد الذكي يفتح ChatGPT مباشرة مع موجه عربي مبدئي.
