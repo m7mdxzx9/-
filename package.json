@@ -1,0 +1,21 @@
+{
+  "name": "ai-students-umm-al-qura",
+  "version": "1.0.0",
+  "description": "منصة طلابية متخصصة في الذكاء الاصطناعي مستوحاة من خطة جامعة أم القرى.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "node scripts/build.js",
+    "start": "node scripts/dev-server.js"
+  },
+  "keywords": [
+    "ai",
+    "students",
+    "umm-al-qura",
+    "education",
+    "arabic"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs"
+}
