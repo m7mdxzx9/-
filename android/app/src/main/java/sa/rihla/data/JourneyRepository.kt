@@ -1,0 +1,166 @@
+package sa.rihla.data
+
+import androidx.room.withTransaction
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import sa.rihla.core.*
+
+class JourneyRepository(private val db: JourneyDatabase) {
+    val dao = db.dao()
+    private val engine = TrackingEngine()
+    private val lock = Mutex()
+
+    suspend fun start(automatic: Boolean, startedAt: Long = System.currentTimeMillis()): Long =
+        lock.withLock {
+            db.withTransaction {
+                dao.active()?.id
+                    ?: dao.insert(Outing(startedAt = startedAt, automatic = automatic)).also {
+                        dao.activate(ActiveSlot(outingId = it))
+                    }
+            }
+        }
+
+    fun area(p: SavedPlace?) = p?.let {
+        Area(
+            it.latitude,
+            it.longitude,
+            it.radius,
+            it.polygon.split(';').mapNotNull { s ->
+                val v = s.split(',')
+                if (v.size == 2)
+                    v[0].toDoubleOrNull()?.let { a -> v[1].toDoubleOrNull()?.let { b -> a to b } }
+                else null
+            },
+        )
+    }
+
+    suspend fun record(f: Fix): Boolean = lock.withLock {
+        db.withTransaction {
+            val o = dao.active() ?: return@withTransaction false
+            val places = dao.places()
+            val result =
+                engine.accept(
+                    o.state,
+                    f,
+                    area(places.find { it.type == "HOME" }),
+                    area(places.find { it.type == "UNIVERSITY" }),
+                )
+            if (!result.accepted) return@withTransaction false
+            dao.point(
+                RoutePoint(
+                    outingId = o.id,
+                    latitude = f.lat,
+                    longitude = f.lon,
+                    accuracy = f.accuracy,
+                    speed = f.speed,
+                    altitude = f.altitude,
+                    bearing = f.bearing,
+                    recordedAt = f.time,
+                    distanceDelta = result.state.meters - o.state.meters,
+                    uncertainGap = result.state.gapMs > o.state.gapMs,
+                    breakBefore = o.state.lastTime > 0 && f.time - o.state.lastTime > 90_000,
+                )
+            )
+            result.events.forEach { store(o.id, it) }
+            var updated =
+                o.copy(
+                    state = result.state,
+                    classification =
+                        if (result.state.universityCounted && o.classification == "OTHER")
+                            "HOME_TO_UNIVERSITY"
+                        else o.classification,
+                )
+            if (result.autoEnd) updated = finish(updated, f.time, true)
+            dao.update(updated)
+            result.autoEnd
+        }
+    }
+
+    private suspend fun store(id: Long, e: Event) {
+        dao.event(
+            JourneyEvent(
+                outingId = id,
+                type = e.type,
+                startedAt = e.start,
+                endedAt = e.end,
+                latitude = e.lat,
+                longitude = e.lon,
+                confirmed = e.confirmed,
+            )
+        )
+    }
+
+    private suspend fun finish(o: Outing, now: Long, automatic: Boolean): Outing {
+        val result = engine.end(o.state, now)
+        result.events.forEach { store(o.id, it) }
+        dao.deactivate()
+        return o.copy(
+            endedAt = now,
+            automaticEnd = automatic,
+            state = result.state,
+            classification =
+                if (o.classification == "OTHER" && o.state.startedUniversity && automatic)
+                    "UNIVERSITY_TO_HOME"
+                else o.classification,
+        )
+    }
+
+    suspend fun end(): Unit = lock.withLock {
+        db.withTransaction {
+            dao.active()?.let { dao.update(finish(it, System.currentTimeMillis(), false)) }
+        }
+    }
+
+    suspend fun addExpense(
+        category: String,
+        amount: Long,
+        liters: Long?,
+        price: Long?,
+        full: Boolean,
+        time: Long,
+        outingId: Long?,
+    ) = lock.withLock {
+        db.withTransaction {
+            require(amount > 0)
+            val previousFill = dao.lastFuelTime(time)
+            val id =
+                dao.expense(
+                    Expense(
+                        outingId = outingId,
+                        category = category,
+                        amountHalala = amount,
+                        createdAt = time,
+                    )
+                )
+            if (category == "FUEL") {
+                require(liters != null && liters > 0 && price != null && price > 0)
+                dao.fuel(
+                    FuelFillUp(
+                        expenseId = id,
+                        createdAt = time,
+                        litersMl = liters,
+                        priceHalala = price,
+                        full = full,
+                        trackedMeters = dao.trackedAt(time),
+                        reliable = previousFill == null || !dao.uncertainGap(previousFill, time),
+                    )
+                )
+            }
+        }
+    }
+
+    suspend fun delete(id: Long) = lock.withLock {
+        db.withTransaction {
+            dao.delete(id)
+            dao.invalidateFuel()
+        }
+    }
+
+    suspend fun clear() = lock.withLock {
+        db.withTransaction {
+            dao.clearOutings()
+            dao.clearExpenses()
+            dao.clearPlaces()
+        }
+    }
+}

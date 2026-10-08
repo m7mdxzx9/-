@@ -1,0 +1,122 @@
+package sa.rihla.feature.statistics
+
+import android.content.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.unit.*
+import com.google.android.gms.location.*
+import java.time.*
+import kotlinx.coroutines.*
+import sa.rihla.core.*
+import sa.rihla.core.Period
+import sa.rihla.data.*
+import sa.rihla.feature.calendar.*
+import sa.rihla.feature.dashboard.*
+import sa.rihla.feature.expenses.*
+import sa.rihla.feature.history.*
+import sa.rihla.feature.onboarding.*
+import sa.rihla.feature.settings.*
+import sa.rihla.feature.statistics.*
+import sa.rihla.feature.tripdetail.*
+import sa.rihla.feature.vehicle.*
+import sa.rihla.tracking.*
+import sa.rihla.ui.*
+
+@Composable
+fun EconomyCard(e: Economy?) {
+    if (e == null) Text(tr("insufficient_fuel"))
+    else {
+        Metric("km_l", num(e.kmPerLiter, 2))
+        Metric("l_100", num(e.litersPer100Km, 2))
+        Metric("sar_km", num(e.sarPerKm, 2))
+    }
+    Text(tr("fuel_method"), style = MaterialTheme.typography.bodySmall)
+}
+
+@Composable
+fun MetricsList(m: Metrics) {
+    Metric("outings_count", num(m.outings.toDouble(), 0))
+    Metric("university_trips", num(m.universityTrips.toDouble(), 0))
+    Metric("visits", num(m.visits.toDouble(), 0))
+    Metric("distance", num(m.meters / 1000) + " " + tr("km"))
+    Metric("driving_time", duration(m.drivingMs) + " " + tr("hours"))
+    Metric("stopped_time", duration(m.stoppedMs) + " " + tr("hours"))
+    Metric("university_time", duration(m.universityMs) + " " + tr("hours"))
+    Metric(
+        "average_visit",
+        if (m.visits > 0) duration(m.universityMs / m.visits) + " " + tr("hours") else tr("empty"),
+    )
+    listOf(
+            "average_travel" to m.averageTravelMs,
+            "fastest" to m.fastestMs,
+            "longest" to m.longestMs,
+        )
+        .forEach { (key, v) ->
+            Metric(key, v?.let { duration(it) + " " + tr("hours") } ?: tr("empty"))
+        }
+    Metric("fuel", num(m.fuel / 100.0, 2) + " " + tr("sar"))
+    Metric("food", num(m.food / 100.0, 2) + " " + tr("sar"))
+    Metric("other", num(m.other / 100.0, 2) + " " + tr("sar"))
+    Metric("total_spending", num(m.total / 100.0, 2) + " " + tr("sar"))
+    Metric(
+        "average_spending",
+        if (m.outings > 0) num(m.total / 100.0 / m.outings, 2) + " " + tr("sar") else tr("empty"),
+    )
+    Metric(
+        "cost_km",
+        if (m.meters > 0) num(m.total / 100.0 / (m.meters / 1000), 2) + " " + tr("sar_km")
+        else tr("empty"),
+    )
+    Heading("fuel_economy")
+    Text(tr("fuel_period"))
+    EconomyCard(m.economy)
+}
+
+@Composable
+fun StatisticsScreen(data: ScreenData) {
+    var period by remember { mutableStateOf(Period.MONTH) }
+    val m = metrics(data, periodBounds(period))
+    val previous = metrics(data, periodBounds(period, previous = true))
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        item {
+            Row(Modifier.horizontalScroll(rememberScrollState())) {
+                Period.entries.zip(listOf("week", "month", "year", "all")).forEach { (p, key) ->
+                    FilterChip(
+                        selected = p == period,
+                        onClick = { period = p },
+                        label = { Text(tr(key)) },
+                    )
+                }
+            }
+        }
+        item {
+            MetricsList(m)
+            Text(tr("stats_policy"))
+            if (period != Period.ALL) {
+                Heading("comparison")
+                Metric("distance_change", num((m.meters - previous.meters) / 1000) + " " + tr("km"))
+                Metric(
+                    "spending_change",
+                    num((m.total - previous.total) / 100.0, 2) + " " + tr("sar"),
+                )
+                Metric(
+                    "trips_change",
+                    num((m.universityTrips - previous.universityTrips).toDouble(), 0),
+                )
+                Metric(
+                    "travel_change",
+                    if (m.averageTravelMs != null && previous.averageTravelMs != null)
+                        num((m.averageTravelMs - previous.averageTravelMs) / 60000.0) +
+                            " " +
+                            tr("minutes")
+                    else tr("no_comparison"),
+                )
+            }
+        }
+    }
+}

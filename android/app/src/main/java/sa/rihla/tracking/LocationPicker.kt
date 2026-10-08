@@ -1,0 +1,100 @@
+package sa.rihla.tracking
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Looper
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.CancellationTokenSource
+import kotlin.coroutines.resume
+import kotlinx.coroutines.*
+import sa.rihla.core.Fix
+
+object LocationPicker {
+    private fun fix(l: Location) =
+        Fix(
+            l.latitude,
+            l.longitude,
+            l.time,
+            l.accuracy.toDouble(),
+            l.speed.toDouble(),
+            l.altitude,
+            l.bearing.toDouble(),
+        )
+
+    @SuppressLint("MissingPermission")
+    suspend fun current(c: Context): Fix? {
+        if (!TrackingService.fineAllowed(c)) return null
+        if (
+            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(c) ==
+                ConnectionResult.SUCCESS
+        ) {
+            val result =
+                withTimeoutOrNull(20000) {
+                    suspendCancellableCoroutine<Fix?> { cont ->
+                        val token = CancellationTokenSource()
+                        cont.invokeOnCancellation { token.cancel() }
+                        try {
+                            LocationServices.getFusedLocationProviderClient(c)
+                                .getCurrentLocation(
+                                    CurrentLocationRequest.Builder()
+                                        .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                                        .setMaxUpdateAgeMillis(15000)
+                                        .setDurationMillis(18000)
+                                        .build(),
+                                    token.token,
+                                )
+                                .addOnSuccessListener {
+                                    if (cont.isActive)
+                                        cont.resume(
+                                            it?.takeIf { l -> l.accuracy <= 60 }?.let(::fix)
+                                        )
+                                }
+                                .addOnFailureListener { if (cont.isActive) cont.resume(null) }
+                        } catch (_: SecurityException) {
+                            cont.resume(null)
+                        }
+                    }
+                }
+            if (result != null) return result
+        }
+        return withTimeoutOrNull(20000) {
+            suspendCancellableCoroutine { cont ->
+                val manager = c.getSystemService(LocationManager::class.java)
+                val listener =
+                    object : LocationListener {
+                        override fun onLocationChanged(l: Location) {
+                            if (l.accuracy <= 60 && cont.isActive) {
+                                manager.removeUpdates(this)
+                                cont.resume(fix(l))
+                            }
+                        }
+                    }
+                cont.invokeOnCancellation { manager.removeUpdates(listener) }
+                try {
+                    val last = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    if (
+                        last != null &&
+                            System.currentTimeMillis() - last.time in 0..15000 &&
+                            last.accuracy <= 60
+                    )
+                        cont.resume(fix(last))
+                    else
+                        manager.requestLocationUpdates(
+                            LocationManager.GPS_PROVIDER,
+                            1000L,
+                            0f,
+                            listener,
+                            Looper.getMainLooper(),
+                        )
+                } catch (_: Exception) {
+                    if (cont.isActive) cont.resume(null)
+                }
+            }
+        }
+    }
+}
