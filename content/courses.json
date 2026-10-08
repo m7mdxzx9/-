@@ -1,0 +1,41 @@
+[
+  { "id": "CS101", "name": "برمجة 1 (Python)", "semester": 1, "credits": 3, "group": "أساسيات", "prereqs": [], "outcomes": ["سكربتات Python بسيطة", "التعامل مع الملفات والدوال"] },
+  { "id": "MATH110", "name": "رياضيات عامة", "semester": 1, "credits": 3, "group": "رياضيات", "prereqs": [], "outcomes": ["تفاضل وتكامل تطبيقي", "أسس الجبر الخطي"] },
+  { "id": "ENG101", "name": "مهارات أكاديمية واتصال", "semester": 1, "credits": 2, "group": "متطلب جامعة", "prereqs": [], "outcomes": ["ملخص بحثي", "عرض تقديمي"] },
+  { "id": "AI101", "name": "مدخل إلى الذكاء الاصطناعي", "semester": 1, "credits": 2, "group": "تخصص", "prereqs": [], "outcomes": ["تصنيف مفاهيم الذكاء الاصطناعي", "وكيل بحث بسيط"] },
+
+  { "id": "CS102", "name": "برمجة 2 + مفاهيم كائنية", "semester": 2, "credits": 3, "group": "أساسيات", "prereqs": ["CS101"], "outcomes": ["تصميم فئات ووراثة", "مشروع برمجي من 500 سطر"] },
+  { "id": "CS201", "name": "هياكل البيانات", "semester": 2, "credits": 3, "group": "أساسيات", "prereqs": ["CS102"], "outcomes": ["تنفيذ قوائم وأشجار وجداول تجزئة", "تحليل تعقيد أساسي"] },
+  { "id": "STAT200", "name": "احتمالات وإحصاء", "semester": 2, "credits": 3, "group": "رياضيات", "prereqs": ["MATH110"], "outcomes": ["توزيعات احتمالية", "اختبارات فرضيات"] },
+  { "id": "CE110", "name": "أسس الأنظمة الحاسوبية", "semester": 2, "credits": 3, "group": "أنظمة", "prereqs": [], "outcomes": ["تمثيل البيانات والمنطق الرقمي", "محاكاة معالج بسيط"] },
+
+  { "id": "CS202", "name": "خوارزميات متقدمة", "semester": 3, "credits": 3, "group": "أساسيات", "prereqs": ["CS201"], "outcomes": ["برمجة ديناميكية وخوارزمية جشعة", "إثبات صحة وتعقيد"] },
+  { "id": "CS210", "name": "قواعد البيانات", "semester": 3, "credits": 3, "group": "بيانات", "prereqs": ["CS201"], "outcomes": ["تصميم ER وعلاقات", "استعلامات SQL متقدمة"] },
+  { "id": "CS220", "name": "برمجة ويب متقدمة", "semester": 3, "credits": 3, "group": "هندسة برمجيات", "prereqs": ["CS102"], "outcomes": ["واجهة + API متكاملة", "نشر موقع بسيط"] },
+  { "id": "CS230", "name": "نظم التشغيل", "semester": 3, "credits": 3, "group": "أنظمة", "prereqs": ["CE110"], "outcomes": ["إدارة عمليات وذاكرة", "برمجة POSIX بسيطة"] },
+
+  { "id": "ML301", "name": "تعلم آلي إشرافي وغير إشرافي", "semester": 4, "credits": 3, "group": "تخصص", "prereqs": ["STAT200", "CS202"], "outcomes": ["نماذج انحدار وتصنيف", "تحقق متبادل ومنحنى تعلم"] },
+  { "id": "IS310", "name": "أمن سيبراني أساسيات", "semester": 4, "credits": 3, "group": "أمن", "prereqs": ["CS230"], "outcomes": ["تشفير ومصادقة", "تقييم ثغرات أساسي"] },
+  { "id": "MATH320", "name": "احتمالات متقدمة", "semester": 4, "credits": 3, "group": "رياضيات", "prereqs": ["STAT200"], "outcomes": ["سلاسل ماركوف", "استدلال بايزي"] },
+  { "id": "CS240", "name": "تحليل وتصميم النظم", "semester": 4, "credits": 3, "group": "هندسة برمجيات", "prereqs": ["CS210"], "outcomes": ["متطلبات ونماذج UML", "تصميم معماري"] },
+
+  { "id": "DL401", "name": "تعلم عميق", "semester": 5, "credits": 3, "group": "تخصص", "prereqs": ["ML301"], "outcomes": ["شبكات MLP/CNN بـ PyTorch", "ضبط فائق وتدريج"] },
+  { "id": "NLP410", "name": "معالجة اللغات الطبيعية", "semester": 5, "credits": 3, "group": "تخصص", "prereqs": ["ML301"], "outcomes": ["تضمين كلمات ونماذج محولات", "تصنيف نصوص عربية"] },
+  { "id": "CV420", "name": "رؤية حاسوبية", "semester": 5, "credits": 3, "group": "تخصص", "prereqs": ["ML301"], "outcomes": ["كشف وتصنيف صور", "تدريب YOLO مخصص"] },
+  { "id": "AI350", "name": "ذكاء اصطناعي متقدم (أنظمة خبيرة)", "semester": 5, "credits": 3, "group": "تخصص", "prereqs": ["CS202"], "outcomes": ["تمثيل المعرفة والاستدلال", "محرك قواعد بسيط"] },
+
+  { "id": "DE330", "name": "هندسة بيانات وخطوط ML", "semester": 6, "credits": 3, "group": "بيانات", "prereqs": ["CS210", "ML301"], "outcomes": ["خط ETL يعمل", "مستودع بيانات مصغّر"] },
+  { "id": "CLD340", "name": "الحوسبة السحابية للذكاء الاصطناعي", "semester": 6, "credits": 3, "group": "سحابة", "prereqs": ["CS220"], "outcomes": ["حاويات Docker", "نشر نموذج كـ API"] },
+  { "id": "IOT360", "name": "إنترنت الأشياء والأنظمة المدمجة", "semester": 6, "credits": 3, "group": "أنظمة", "prereqs": ["CE110"], "outcomes": ["قراءة حسّاسات", "نشر نموذج على الحافة"] },
+  { "id": "ETH370", "name": "أخلاقيات وحوكمة الذكاء الاصطناعي", "semester": 6, "credits": 2, "group": "أخلاقيات", "prereqs": ["AI101"], "outcomes": ["تحليل حالة تحيز نموذج", "قائمة تدقيق حوكمة"] },
+
+  { "id": "RL430", "name": "تعلم معزز وروبوتات", "semester": 7, "credits": 3, "group": "تخصص", "prereqs": ["DL401", "MATH320"], "outcomes": ["Q-learning وPolicy Gradient", "محاكاة بيئة"] },
+  { "id": "PM440", "name": "منتجات الذكاء الاصطناعي وإدارة المشاريع", "semester": 7, "credits": 2, "group": "إدارة", "prereqs": ["ETH370"], "outcomes": ["وثيقة منتج مدعوم بالذكاء", "خطة Agile"] },
+  { "id": "SP450", "name": "موضوعات مختارة (حسب طرح القسم)", "semester": 7, "credits": 3, "group": "تخصص", "prereqs": ["ML301"], "outcomes": ["قراءة نقدية في أحدث الأبحاث", "تطبيق بحثي مصغّر"] },
+  { "id": "COOP460", "name": "تدريب تعاوني", "semester": 7, "credits": 2, "group": "سوق عمل", "prereqs": [], "outcomes": ["تقرير تدريب موثّق", "مهمة فعلية في جهة"] },
+
+  { "id": "CAP401", "name": "مشروع التخرج (مرحلة التنفيذ)", "semester": 8, "credits": 3, "group": "تخرج", "prereqs": ["PM440"], "outcomes": ["نموذج أولي يعمل", "عرض نهائي وتوثيق"] },
+  { "id": "ENT470", "name": "ريادة الأعمال التقنية", "semester": 8, "credits": 2, "group": "إدارة", "prereqs": [], "outcomes": ["نموذج عمل", "عرض استثماري مختصر"] },
+  { "id": "RES480", "name": "ورقة بحثية وقياس الأداء", "semester": 8, "credits": 2, "group": "تخرج", "prereqs": ["SP450"], "outcomes": ["مسودة ورقة", "مقاييس تقييم نموذج"] },
+  { "id": "BUS490", "name": "تحليل تجاري للذكاء الاصطناعي", "semester": 8, "credits": 2, "group": "إدارة", "prereqs": [], "outcomes": ["دراسة جدوى", "تحليل عائد على الاستثمار"] }
+]

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>لوحة تحكم محتوى منصة AI UQU</title>
+    <style>
+      :root { color-scheme: light dark; --bd: #dde5ec; --fg: #0b1220; --mut: #5b6b7c; --pri: #0f766e; }
+      @media (prefers-color-scheme: dark) { :root { --bd: #243345; --fg: #e8edf2; --mut: #93a3b4; --pri: #2dd4bf; } body { background: #0b1220; } }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: 'Segoe UI', Tahoma, system-ui, sans-serif; color: var(--fg); padding: 20px; max-width: 1080px; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      p.sub { margin: 0 0 18px; color: var(--mut); font-size: 13px; }
+      .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+      input, select, textarea, button { font: inherit; color: inherit; }
+      input, select { padding: 9px 11px; border: 1px solid var(--bd); border-radius: 10px; background: transparent; }
+      input#token { width: 170px; }
+      button { padding: 9px 15px; border-radius: 10px; border: 1px solid transparent; background: var(--pri); color: #fff; font-weight: 700; cursor: pointer; }
+      button.ghost { background: transparent; border-color: var(--bd); color: var(--fg); font-weight: 600; }
+      textarea { width: 100%; min-height: 440px; padding: 12px; border: 1px solid var(--bd); border-radius: 12px; background: transparent; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; line-height: 1.55; direction: ltr; text-align: left; }
+      .msg { padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; border-inline-start: 4px solid var(--pri); background: rgba(15,118,110,.08); margin: 10px 0; }
+      .msg.bad { border-color: #b91c1c; background: rgba(185,28,28,.09); }
+      table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin-top: 8px; }
+      th, td { border: 1px solid var(--bd); padding: 7px 9px; text-align: right; }
+      th { background: rgba(128,128,128,.08); }
+      .cards { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+      .card { border: 1px solid var(--bd); border-radius: 12px; padding: 10px 13px; min-width: 130px; }
+      .card b { display: block; font-size: 19px; }
+      .card span { color: var(--mut); font-size: 11.5px; font-weight: 600; }
+      section { margin-top: 26px; }
+    </style>
+  </head>
+  <body>
+    <h1>لوحة تحكم المحتوى — منصة طلاب الذكاء الاصطناعي</h1>
+    <p class="sub">
+      تحرّر هنا ملفات الخطة، والتعديلات تصل للتطبيق من <code>GET /api/content</code>. التحقق حاصل على السيرفر
+      (معرّفات مكررة، متطلبات معلّقة، أوزان غير رقمية) قبل أي حفظ.
+    </p>
+
+    <div class="bar">
+      <select id="key"></select>
+      <input id="token" type="password" placeholder="ADMIN_TOKEN" />
+      <button id="load">تحميل</button>
+      <button id="save">حفظ</button>
+      <button id="reload" class="ghost">إعادة قراءة الملف</button>
+      <button id="devices" class="ghost">الأجهزة المتزامنة</button>
+    </div>
+    <div id="msg" class="msg" hidden></div>
+
+    <div class="cards" id="stats"></div>
+    <textarea id="editor" spellcheck="false"></textarea>
+
+    <section>
+      <h1 style="font-size: 16px">مراجعة سريعة للخطة</h1>
+      <div id="table"></div>
+    </section>
+
+    <script>
+      const KEYS = ['program', 'courses', 'tracks', 'projects', 'resources'];
+      const sel = document.getElementById('key');
+      const editor = document.getElementById('editor');
+      const msg = document.getElementById('msg');
+      const tokenInput = document.getElementById('token');
+      tokenInput.value = localStorage.getItem('adminToken') || '';
+      KEYS.forEach((k) => sel.add(new Option(k, k)));
+      sel.onchange = () => load();
+
+      function say(text, bad) {
+        msg.hidden = false;
+        msg.textContent = text;
+        msg.className = 'msg' + (bad ? ' bad' : '');
+      }
+
+      async function api(path, init) {
+        const res = await fetch(path, init);
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body.error || 'HTTP ' + res.status);
+        return body;
+      }
+
+      async function load() {
+        try {
+          const { data } = await api('/api/content/' + sel.value);
+          editor.value = JSON.stringify(data, null, 2);
+          say('تم تحميل ' + sel.value + ' — ' + count(data) + ' عنصر.');
+          render(data);
+        } catch (e) {
+          say('فشل التحميل: ' + e.message, true);
+        }
+      }
+
+      function count(data) {
+        return Array.isArray(data) ? data.length : Object.keys(data || {}).length;
+      }
+
+      async function save() {
+        let value;
+        try {
+          value = JSON.parse(editor.value);
+        } catch (e) {
+          say('JSON غير صالح قبل الإرسال: ' + e.message, true);
+          return;
+        }
+        const local = validate(sel.value, value);
+        if (local.length) {
+          say('أصلح أولاً: ' + local.join(' | '), true);
+          return;
+        }
+        localStorage.setItem('adminToken', tokenInput.value);
+        try {
+          const out = await api('/api/content/' + sel.value, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tokenInput.value },
+            body: JSON.stringify(value),
+          });
+          say('تمّ الحفظ ✓ (' + out.bytes + ' بايت) • إصدار المحتوى: ' + out.contentVersion);
+          render(value);
+        } catch (e) {
+          say('رفض السيرفر: ' + e.message, true);
+        }
+      }
+
+      function validate(key, data) {
+        const errs = [];
+        if (key !== 'courses') return errs;
+        const ids = new Set();
+        (data || []).forEach((c) => {
+          if (!c.id) errs.push('مقرر بدون id');
+          if (ids.has(c.id)) errs.push('مكرر: ' + c.id);
+          ids.add(c.id);
+          if (typeof c.credits !== 'number') errs.push(c.id + ': credits ليس رقماً');
+        });
+        (data || []).forEach((c) => (c.prereqs || []).forEach((p) => !ids.has(p) && errs.push(c.id + ': متطلب مفقود ' + p)));
+        return errs;
+      }
+
+      function render(data) {
+        const stats = document.getElementById('stats');
+        const table = document.getElementById('table');
+        if (sel.value !== 'courses' || !Array.isArray(data)) {
+          stats.innerHTML = '<div class="card"><b>' + count(data) + '</b><span>عدد العناصر</span></div>';
+          table.innerHTML = '<p style="color:var(--mut);font-size:13px">الملخص الجدولي متاح لملف المقررات.</p>';
+          return;
+        }
+        const total = data.reduce((s, c) => s + (Number(c.credits) || 0), 0);
+        const sems = {};
+        data.forEach((c) => (sems[c.semester] = (sems[c.semester] || 0) + 1));
+        stats.innerHTML =
+          '<div class="card"><b>' + data.length + '</b><span>مقرر</span></div>' +
+          '<div class="card"><b>' + total + '</b><span>ساعة معتمدة</span></div>' +
+          '<div class="card"><b>' + Object.keys(sems).length + '</b><span>فصل دراسي</span></div>' +
+          '<div class="card"><b>' + Object.keys(sems).map((k) => sems[k]).join(' / ') + '</b><span>توزيع المواد على الفصول</span></div>';
+        table.innerHTML =
+          '<table><thead><tr><th>الكود</th><th>المقرر</th><th>فصل</th><th>ساعات</th><th>مجموعة</th><th>متطلبات</th></tr></thead><tbody>' +
+          data
+            .map(
+              (c) =>
+                '<tr><td>' + c.id + '</td><td>' + c.name + '</td><td>' + c.semester + '</td><td>' + c.credits +
+                '</td><td>' + (c.group || '-') + '</td><td>' + (c.prereqs || []).join('، ') + '</td></tr>',
+            )
+            .join('') +
+          '</tbody></table>';
+      }
+
+      document.getElementById('load').onclick = load;
+      document.getElementById('reload').onclick = load;
+      document.getElementById('save').onclick = save;
+      document.getElementById('devices').onclick = async () => {
+        try {
+          const { devices } = await api('/api/devices');
+          say(devices.length ? 'الأجهزة: ' + devices.join('، ') : 'لا توجد أجهزة رفعت نسخة بعد.');
+        } catch (e) {
+          say('فشل: ' + e.message, true);
+        }
+      };
+      load();
+    </script>
+  </body>
+</html>

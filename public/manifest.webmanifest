@@ -1,0 +1,25 @@
+{
+  "name": "مسار الطالب — الذكاء الاصطناعي بجامعة أم القرى",
+  "short_name": "AI UQU",
+  "description": "متابعة دراسية للخطة مع حساب المعدل، وخريطة تسجّل المسارات التي تمر بها.",
+  "id": "ai-uqu-app",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#F6F8FA",
+  "theme_color": "#0F766E",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "الخطة والمتابعة", "url": "./plan", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "تسجيل مسار", "url": "./map", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

@@ -1,0 +1,20 @@
+:root {
+  --font-display: 'Segoe UI', Tahoma, 'Noto Kufi Arabic', 'Noto Naskh Arabic', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  --font-rounded: 'Segoe UI', 'Noto Kufi Arabic', system-ui, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-display);
+}
+
+* {
+  box-sizing: border-box;
+}
