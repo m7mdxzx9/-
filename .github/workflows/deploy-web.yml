@@ -3,6 +3,8 @@ name: نشر نسخة الويب على GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       base_url:
@@ -16,19 +18,24 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: فحص وبناء
+    name: فحص وبناء (${{ github.event_name == 'pull_request' && 'معاينة' || 'نشر' }})
     runs-on: ubuntu-latest
     env:
-      # اسم المستودع هنا «-» فيصبح المسار /- تلقائياً
-      EXPO_BASE_URL: ${{ github.event.inputs.base_url || format('/{0}', github.event.repository.name) }}
       CI: 'true'
     steps:
       - uses: actions/checkout@v4
+
+      # على push / pull_request لا نضبط شيئاً: app.config.js يستنتج /اسم-المستودع من GITHUB_REPOSITORY.
+      # هنا نتعامل فقط مع التشغيل اليدوي، حيث ترك الحقل فارغاً = انشر على جذر النطاق.
+      - name: ضبط مسار الأساس (تشغيل يدوي فقط)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env: { INPUT_BASE_URL: '${{ inputs.base_url }}' }
+        run: echo "EXPO_BASE_URL=${INPUT_BASE_URL}" >> "$GITHUB_ENV"
 
       - uses: actions/setup-node@v4
         with:
@@ -44,21 +51,36 @@ jobs:
       - name: بناء نسخة الويب
         run: npm run build:web
 
-      - name: تجهيز المجلد للنشر (مسارات نظيفة + 404)
-        run: node scripts/pages-prepare.js
+      - name: تجهيز المجلد للنشر (مسارات نظيفة + 404 + تحقق من الأصول)
+        run: node scripts/pages-prepare.js dist
 
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: اختبار الملفات المنتجة
+        run: |
+          test -f dist/index.html || { echo "لا يوجد dist/index.html"; exit 1; }
+          test -f dist/plan/index.html || { echo "لم تتحول الخطة إلى مسار نظيف"; exit 1; }
+          test -f dist/manifest.webmanifest || { echo "ملف التثبيت مفقود — هل public/ موجود؟"; exit 1; }
+          grep -q "_expo/static/js" dist/index.html || { echo "مرجع الحزمة مفقود"; exit 1; }
+          echo "✓ dist جاهز:" && du -sh dist
+
+      - name: رفع نسخة القياس لفحص الحجم
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
-    name: نشر
+    name: نشر على Pages
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
+      - name: تجهيز Pages (يفعّلها إن كانت مغلقة)
+        id: configure
+        uses: actions/configure-pages@v5
+
+      - name: نشر
+        id: deployment
         uses: actions/deploy-pages@v4

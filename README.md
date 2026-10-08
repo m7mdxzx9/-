@@ -75,33 +75,45 @@ content/*.json  ──تُقرأ──►  src/lib/content.ts  ──►  AppPro
 ## النشر على GitHub Pages
 
 نعم — نسخة الويب تُصدَّر كموقع ثابت (`expo export -p web`) وتُخدم من Pages بلا أي سيرفر.
-البناء مُختبَر: ٧ مسارات ثابتة (`/`, `/plan`, `/map`, `/explore`, `/settings`, …) مع أصول تحت مسار الأساس.
+**مُختبَر محلياً**: ٥ صفحات بمسارات نظيفة + `400B` قشرة `404.html` + manifest وأيقونات، كلها `200` تحت `/-/`.
 
 ```bash
-EXPO_BASE_URL=/اسم-المستودع npm run pages:build   # يبني إلى dist/ ثم يجهّزه للنشر
-mkdir -p /tmp/site/- && cp -r dist/* /tmp/site/-/ # محاكاة الاستضافة: الموقع تحت /-/
-python3 -m http.server -d /tmp/site 8090          # ثم افتح http://localhost:8090/-/
+npm run pages:build                                    # بناء + تجهيز (على الجذر: للتطوير/Nginx/Range)
+EXPO_BASE_URL=/اسم-المستودع npm run pages:build        # لموقع مشروع على Pages
+EXPO_BASE_URL=        npm run pages:build              # لجذر النطاق (USERNAME.github.io)
 ```
 
-**التلقائي:** `.github/workflows/deploy-web.yml` يعمل عند كل push على `main`:
-`npm ci` → `typecheck` → بناء → `scripts/pages-prepare.js` → نشر على Pages.
-`EXPO_BASE_URL` فيه مشتق من اسم المستودع تلقائياً (ولهذا المستودع `اسمه = -` فيصبح `/ -` → `/-`).
+| الآلية | ماذا تفعل |
+| --- | --- |
+| `app.config.js` | يقرأ `EXPO_BASE_URL` ويضبط `experiments.baseUrl` (فتُصبح كل الأصول `/-/...`) ويمرّر نفس القيمة إلى `extra.baseUrl`. لو المتغيّر غير مضبوط داخل GitHub Actions يستنتج المسار من `GITHUB_REPOSITORY`. بلا أي شيء → جذر النطاق |
+| `scripts/pages-prepare.js` | `plan.html` ← `plan/index.html` (رابط نظيف على أي استضافة)، كتابة `404.html` كقشرة تحمّل نفس الحزمة فيعيدك الراوتر لمسارك بدل صفحة ميتة، وتحقق أن كل `src`/`href` في `index.html` موجود فعلاً على القرص |
+| `.github/workflows/deploy-web.yml` | على `pull_request`: فحص أنواع + بناء + تجهيز + اختبار مخرجات `dist` (بلا نشر). على `main`: نفس الشيء ثم `configure-pages` (يفعّل Pages إن كانت مغلقة) + `deploy-pages` |
+| `scripts/publish-site.sh` | اختياري: نشر `dist/` في مستودع Pages آخر للحصول على رابط نظيف (يطلب تأكيداً قبل الدفع) |
 
-**مهم — قيدان على Pages:**
-1. `server/index.js` لا يعمل هناك (Pages ملفات ثابتة فقط). لوحة التحكم تُشغَّل محلياً، ثم
-   `npm run content:pull` → commit → الـ workflow يعيد البناء. المزامنة من داخل التطبيق تفشل بهدوء
-   وتبقى على المحتوى المضمّن (offline-first).
-2. ما يشتغل في المتصفح: المتابعة وGPA والتخزين المحلي، وتسجيل المسارات (Pages يعطيك **HTTPS**
-   فيقبل المتصفح إذن الموقع)، وبلاط OpenStreetMap. ما لا يشتغل: رفع نسخة للسيرفر ومزامنة المحتوى.
+### التثبيت على الشاشة الرئيسية (PWA)
+`public/manifest.webmanifest` + أيقونات 192/512/maskable + `apple-touch-icon` تُولَّد من `assets/images/icon.png`
+وتُنسخ تلقائياً إلى `dist/`. الوسوم تُحقن وقت التشغيل في `src/app/_layout.tsx` (روابط نسبية `./` فتشتغل على
+`/-/` وعلى الجذر معاً) → زر «Add to Home Screen» على أندرويد و«مشاركة → إضافة إلى الشاشة الرئيسية» على iOS.
 
-**نصيحة عن الرابط:** مستودع باسم `-` يعطي `https://USERNAME.github.io/-/` — يشتغل، لكن إن أردت
-رابطاً أنظف انشر على مستودع `USERNAME.github.io` أو نطاق خاص، وعيّن `EXPO_BASE_URL=''` (عندها
-يُسقط `app.config.js` مسار الأساس من تلقاء نفسه).
+**متعمَّق: لا يوجد Service Worker.** بدون اختبار على متصفح حقيقي هنا، كاش قد يقدّم نسخة قديمة من الحزمة
+أخطر من فائدته؛ لذا التخزين المحلي (AsyncStorage/localStorage) هو ما يبقي بياناتك، بينما الملف نفسه يحتاج
+إنترنت للفتح. لو أردته، أضف `expo-serviceworker` و`public/sw.js` لاحقاً مع سياسة `network-first` للمسارات.
+
+### قيدان معروفان على Pages
+1. `server/index.js` ولوحة `/admin` لا يعملان (Pages ملفات ثابتة فقط). البديل العملي:
+   `npm run server` محلياً ← عدّل في اللوحة ← `npm run content:pull` ← commit ← يعيد الـ workflow البناء.
+   ومزامنة التطبيق تفشل بهدوء وتبقى على المحتوى المضمّن (offline-first).
+2. بيانات التقدّم والمسارات في `localStorage` للمتصفح: لا تتزامن بين الأجهزة، وتُفقد إذا مسح المتصفح تخزينه.
+
+> **رابط قصير:** مستودع باسم `-` يعطي `https://USERNAME.github.io/-/` (يشتغل). للأنظف انشر على
+> `USERNAME.github.io` بـ `EXPO_BASE_URL=''`، أو استخدم `scripts/publish-site.sh`.
 
 ## ما تم التحقق منه فعلاً
 
 - `npm run typecheck` صفر أخطاء، و Metro يبني حزمة الويب (٩٠٥ وحدة) بلا تحذيرات.
 - الشاشات الخمس تُرجَع `200` وتحتوي نصها العربي عند التشغيل بوضع `static` (SSR).
+- `expo export -p web` + `pages-prepare.js` تحت `/-/`: كل الأصول موجودة، والمسارات النظيفة
+  (`/-/plan/`, `/-/map/`) و`manifest.webmanifest` والأيقونات و`404.html` كلها `200` بخدمة محلية ثابتة.
 - السيرفر: `GET /api/content` يُعيد ٣٢ مقرراً و٨٨ ساعة؛ `PUT` بدون توكن `401`؛ JSON مكسور `400`؛
   متطلب غير موجود `400`؛ `scripts/sync-content.js --push` نجح للملفات الخمسة؛ دورة `/api/devices` كاملة.
 
