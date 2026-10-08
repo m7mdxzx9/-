@@ -1,0 +1,42 @@
+[
+  {
+    "id": "general-ai",
+    "name": "الذكاء الاصطناعي العام",
+    "summary": "أساسيات النمذجة والتعلم الآلي والتعلم العميق مع تطبيقات متعددة.",
+    "semesters": [4, 5, 6],
+    "courses": ["ML301", "DL401", "MATH320"],
+    "projects": ["data-explorer", "course-recommender"],
+    "resources": ["https://course.fast.ai/", "https://www.coursera.org/learn/machine-learning"],
+    "tools": ["NumPy", "pandas", "Scikit-learn", "PyTorch"]
+  },
+  {
+    "id": "arabic-nlp",
+    "name": "معالجة اللغة العربية",
+    "summary": "بناء نماذج لغوية عربية وتطبيقات المحادثة وتحليل النصوص.",
+    "semesters": [5, 6],
+    "courses": ["NLP410", "ETH370"],
+    "projects": ["arabic-assistant"],
+    "resources": ["https://huggingface.co/models?language=ar", "https://github.com/aub-mind/arabert"],
+    "tools": ["transformers", "spaCy", "clean-text", "AraBERT"]
+  },
+  {
+    "id": "computer-vision",
+    "name": "الرؤية الحاسوبية",
+    "summary": "تحليل الصور والفيديو ودمج الرؤية مع تطبيقات الواقع المعزز.",
+    "semesters": [5, 6],
+    "courses": ["CV420", "IOT360"],
+    "projects": ["vision-gate"],
+    "resources": ["https://cs231n.stanford.edu/", "https://docs.opencv.org/"],
+    "tools": ["OpenCV", "Ultralytics YOLO", "PyTorch"]
+  },
+  {
+    "id": "cloud-ai",
+    "name": "الذكاء الاصطناعي السحابي",
+    "summary": "تشغيل النماذج على السحابة، الحاويات، خطوط النشر، والمراقبة.",
+    "semesters": [6, 7],
+    "courses": ["DE330", "CLD340"],
+    "projects": ["course-recommender", "capstone"],
+    "resources": ["https://www.aws.training/Details/Curriculum?id=20685", "https://cloud.google.com/training/machinelearning-ai"],
+    "tools": ["Docker", "FastAPI", "Kubernetes", "Grafana"]
+  }
+]

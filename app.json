@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "AI UQU — مسار الطالب",
+    "slug": "ai-uqu-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "aiuqu",
+    "userInterfaceStyle": "automatic",
+    "locales": {},
+    "ios": {
+      "icon": "./assets/expo.icon",
+      "supportsTablet": true,
+      "bundleIdentifier": "edu.uqu.aistudents"
+    },
+    "android": {
+      "package": "edu.uqu.aistudents",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F766E",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "يسمح التطبيق بتسجيل مسارك على الخريطة لحفظ الخطوط التي تمر بها."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0F766E",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 96
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

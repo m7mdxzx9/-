@@ -1,0 +1,62 @@
+[
+  {
+    "id": "math",
+    "name": "الأساسيات الرياضية",
+    "summary": "إحصاء واحتمالات وجبر خطي مع أمثلة تطبيقية على النمذجة.",
+    "links": [
+      { "label": "Khan Academy - Statistics", "url": "https://www.khanacademy.org/math/statistics-probability" },
+      { "label": "3Blue1Brown - Linear Algebra", "url": "https://www.3blue1brown.com/topics/linear-algebra" },
+      { "label": "MIT OCW - Probability", "url": "https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2014/" }
+    ]
+  },
+  {
+    "id": "ml",
+    "name": "التعلم الآلي",
+    "summary": "مساقات عملية مع مشاريع مصاحبة لتقوية الفهم التطبيقي.",
+    "links": [
+      { "label": "fast.ai Practical Deep Learning", "url": "https://course.fast.ai/" },
+      { "label": "Coursera Machine Learning", "url": "https://www.coursera.org/learn/machine-learning" },
+      { "label": "Hands-On ML (O'Reilly)", "url": "https://www.oreilly.com/library/view/hands-on-machine-learning/9781492032632/" }
+    ]
+  },
+  {
+    "id": "cloud",
+    "name": "الهندسة السحابية",
+    "summary": "بناء خطوط نشر وتفعيل مراقبة الأداء للنماذج.",
+    "links": [
+      { "label": "AWS Machine Learning Foundations", "url": "https://www.aws.training/Details/Curriculum?id=20685" },
+      { "label": "GCP Vertex AI Labs", "url": "https://cloud.google.com/training/machinelearning-ai" },
+      { "label": "Docker & Kubernetes by Example", "url": "https://kubernetesbyexample.com/" }
+    ]
+  },
+  {
+    "id": "ethics",
+    "name": "أخلاقيات وحوكمة",
+    "summary": "مبادئ الشفافية والتحيز والمسؤولية في تطبيقات الذكاء الاصطناعي.",
+    "links": [
+      { "label": "EU AI Act", "url": "https://artificialintelligenceact.eu/the-act/" },
+      { "label": "Responsible AI (Google)", "url": "https://ai.google/responsibility/principles/" },
+      { "label": "OECD AI Principles", "url": "https://www.oecd.org/en/topics/sub-issues/ai-principles.html" }
+    ]
+  },
+  {
+    "id": "arabic-nlp",
+    "name": "معالجة اللغة العربية",
+    "summary": "مراجع وأدوات لدعم المشاريع باللغة العربية.",
+    "links": [
+      { "label": "HuggingFace Arabic Models", "url": "https://huggingface.co/models?language=ar" },
+      { "label": "AraBERT", "url": "https://github.com/aub-mind/arabert" },
+      { "label": "Arabic NLP Resources", "url": "https://github.com/ARBML/arabic-nlp-resources" }
+    ]
+  },
+  {
+    "id": "coding",
+    "name": "البرمجة والمشاريع",
+    "summary": "أدلة عملية لتطبيق المشاريع المقترحة في كل فصل.",
+    "links": [
+      { "label": "Python Roadmap", "url": "https://roadmap.sh/python" },
+      { "label": "FastAPI Docs", "url": "https://fastapi.tiangolo.com/" },
+      { "label": "PyTorch Tutorials", "url": "https://pytorch.org/tutorials/" }
+    ]
+  }
+]

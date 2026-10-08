@@ -1,0 +1,44 @@
+{
+  "university": "جامعة أم القرى",
+  "program": "بكالوريوس الذكاء الاصطناعي",
+  "totalCreditHours": 88,
+  "maxSemesterLoad": 18,
+  "recommendedMaxLoad": 16,
+  "defaultScale": "5.0",
+  "disclaimer": "الخطة توضيحية، مبنية على محتوى المنصة السابقة وغير معتمدة. عدّلها من لوحة التحكم وطابقها مع الخطة الرسمية في بوابة الجامعة.",
+  "gpaScales": {
+    "5.0": {
+      "label": "مقياس ٥ نقاط (شائع في الجامعات السعودية)",
+      "minPassingPoints": 2.0,
+      "grades": [
+        { "key": "A+", "points": 5.0 },
+        { "key": "A", "points": 4.75 },
+        { "key": "B+", "points": 4.5 },
+        { "key": "B", "points": 4.0 },
+        { "key": "C+", "points": 3.75 },
+        { "key": "C", "points": 3.5 },
+        { "key": "D+", "points": 3.25 },
+        { "key": "D", "points": 3.0 },
+        { "key": "F", "points": 1.0 }
+      ]
+    },
+    "4.0": {
+      "label": "مقياس ٤ نقاط",
+      "minPassingPoints": 1.0,
+      "grades": [
+        { "key": "A+", "points": 4.0 },
+        { "key": "A", "points": 4.0 },
+        { "key": "A-", "points": 3.7 },
+        { "key": "B+", "points": 3.3 },
+        { "key": "B", "points": 3.0 },
+        { "key": "B-", "points": 2.7 },
+        { "key": "C+", "points": 2.3 },
+        { "key": "C", "points": 2.0 },
+        { "key": "C-", "points": 1.7 },
+        { "key": "D+", "points": 1.3 },
+        { "key": "D", "points": 1.0 },
+        { "key": "F", "points": 0.0 }
+      ]
+    }
+  }
+}
