@@ -45,7 +45,9 @@
     "content:pull": "node scripts/sync-content.js --pull",
     "build:web": "expo export -p web",
     "build:apk": "eas build -p android --profile preview",
-    "doctor": "npx expo-doctor"
+    "doctor": "npx expo-doctor",
+    "pages:prepare": "node scripts/pages-prepare.js",
+    "pages:build": "npm run build:web && node scripts/pages-prepare.js"
   },
   "private": true,
   "description": "تطبيق جوال (Expo + React Native) لطلاب الذكاء الاصطناعي في جامعة أم القرى: متابعة دراسية، GPA، خريطة تسجّل المسارات، ولوحة تحكم للمحتوى.",

@@ -1,0 +1,64 @@
+name: نشر نسخة الويب على GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'مسار الأساس (مثال /اسم-المستودع). اتركه فارغاً للنشر على جذر النطاق'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: فحص وبناء
+    runs-on: ubuntu-latest
+    env:
+      # اسم المستودع هنا «-» فيصبح المسار /- تلقائياً
+      EXPO_BASE_URL: ${{ github.event.inputs.base_url || format('/{0}', github.event.repository.name) }}
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: تثبيت التبعيات
+        run: npm ci --no-audit --no-fund
+
+      - name: فحص الأنواع
+        run: npm run typecheck
+
+      - name: بناء نسخة الويب
+        run: npm run build:web
+
+      - name: تجهيز المجلد للنشر (مسارات نظيفة + 404)
+        run: node scripts/pages-prepare.js
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: نشر
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

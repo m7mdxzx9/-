@@ -72,6 +72,32 @@ content/*.json  ──تُقرأ──►  src/lib/content.ts  ──►  AppPro
 تقدّمك ومساراتك ──► AsyncStorage (محلي أولاً) ──اختيارياً──► /api/devices/<deviceId>
 ```
 
+## النشر على GitHub Pages
+
+نعم — نسخة الويب تُصدَّر كموقع ثابت (`expo export -p web`) وتُخدم من Pages بلا أي سيرفر.
+البناء مُختبَر: ٧ مسارات ثابتة (`/`, `/plan`, `/map`, `/explore`, `/settings`, …) مع أصول تحت مسار الأساس.
+
+```bash
+EXPO_BASE_URL=/اسم-المستودع npm run pages:build   # يبني إلى dist/ ثم يجهّزه للنشر
+mkdir -p /tmp/site/- && cp -r dist/* /tmp/site/-/ # محاكاة الاستضافة: الموقع تحت /-/
+python3 -m http.server -d /tmp/site 8090          # ثم افتح http://localhost:8090/-/
+```
+
+**التلقائي:** `.github/workflows/deploy-web.yml` يعمل عند كل push على `main`:
+`npm ci` → `typecheck` → بناء → `scripts/pages-prepare.js` → نشر على Pages.
+`EXPO_BASE_URL` فيه مشتق من اسم المستودع تلقائياً (ولهذا المستودع `اسمه = -` فيصبح `/ -` → `/-`).
+
+**مهم — قيدان على Pages:**
+1. `server/index.js` لا يعمل هناك (Pages ملفات ثابتة فقط). لوحة التحكم تُشغَّل محلياً، ثم
+   `npm run content:pull` → commit → الـ workflow يعيد البناء. المزامنة من داخل التطبيق تفشل بهدوء
+   وتبقى على المحتوى المضمّن (offline-first).
+2. ما يشتغل في المتصفح: المتابعة وGPA والتخزين المحلي، وتسجيل المسارات (Pages يعطيك **HTTPS**
+   فيقبل المتصفح إذن الموقع)، وبلاط OpenStreetMap. ما لا يشتغل: رفع نسخة للسيرفر ومزامنة المحتوى.
+
+**نصيحة عن الرابط:** مستودع باسم `-` يعطي `https://USERNAME.github.io/-/` — يشتغل، لكن إن أردت
+رابطاً أنظف انشر على مستودع `USERNAME.github.io` أو نطاق خاص، وعيّن `EXPO_BASE_URL=''` (عندها
+يُسقط `app.config.js` مسار الأساس من تلقاء نفسه).
+
 ## ما تم التحقق منه فعلاً
 
 - `npm run typecheck` صفر أخطاء، و Metro يبني حزمة الويب (٩٠٥ وحدة) بلا تحذيرات.
