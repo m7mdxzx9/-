@@ -87,7 +87,8 @@ EXPO_BASE_URL=        npm run pages:build              # لجذر النطاق (
 | --- | --- |
 | `app.config.js` | يقرأ `EXPO_BASE_URL` ويضبط `experiments.baseUrl` (فتُصبح كل الأصول `/-/...`) ويمرّر نفس القيمة إلى `extra.baseUrl`. لو المتغيّر غير مضبوط داخل GitHub Actions يستنتج المسار من `GITHUB_REPOSITORY`. بلا أي شيء → جذر النطاق |
 | `scripts/pages-prepare.js` | `plan.html` ← `plan/index.html` (رابط نظيف على أي استضافة)، كتابة `404.html` كقشرة تحمّل نفس الحزمة فيعيدك الراوتر لمسارك بدل صفحة ميتة، وتحقق أن كل `src`/`href` في `index.html` موجود فعلاً على القرص |
-| `.github/workflows/deploy-web.yml` | على `pull_request`: فحص أنواع + بناء + تجهيز + اختبار مخرجات `dist` (بلا نشر). على `main`: نفس الشيء ثم `configure-pages` (يفعّل Pages إن كانت مغلقة) + `deploy-pages` |
+| `.github/workflows/deploy-web.yml` | على `pull_request`: فحص أنواع + بناء + تجهيز + اختبار مخرجات `dist` (بلا نشر). على `main`: نفس الشيء ثم `configure-pages` + `deploy-pages`. لو كانت Pages مغلقة يحاول `configure-pages` تفعيلها؛
+  وإن رفض الصلاحية يفشل التشغيل برسالة واضحة — فعّلها يدوياً: Settings → Pages → Source: **GitHub Actions** |
 | `scripts/publish-site.sh` | اختياري: نشر `dist/` في مستودع Pages آخر للحصول على رابط نظيف (يطلب تأكيداً قبل الدفع) |
 
 ### التثبيت على الشاشة الرئيسية (PWA)
